@@ -10,9 +10,14 @@ def extractData(url, headings):
     dataset = pandas.read_csv(url, names=headings)
     return dataset.values
 
-def featureCategories(array, i):
-    return list(set(array[:, i]))
-
+def featureCategories(array):
+    categories_group = []
+    
+    for i in range(len(array[0])-1):
+        categories_group.append(list(set(array[:, i])))
+        
+    return categories_group
+    
 def initialiseArray(feature_number):
     multi_dimensional_array = []
     for _ in range(feature_number): multi_dimensional_array.append([])
@@ -29,19 +34,27 @@ def sortedFeature(array, feature_number, feature_categories):
         for j in range(len(feature_categories)):
             category = feature_categories[j]
             if data_point == category: 
+#                 print(training_example)
                 sorted_feature[j].append(training_example)
-    
+     
+#     print(sorted_feature)            
     return sorted_feature
 
 def classFraction(list_items, class_item):
     
     no_items = float(len(list_items))
     
-    number_yes = 0.0
-    for item in list_items:
-        if item[len(item)-1] == class_item: number_yes += 1.0
-            
-    return number_yes/no_items
+    if no_items > 0:
+        
+        number_yes = 0.0
+        for item in list_items:
+            if item[len(item)-1] == class_item: number_yes += 1.0
+        
+        fraction = number_yes/no_items    
+        
+    else: fraction = 1.0
+        
+    return 
         
 def featureEntropy(sorted_feature, population):
     
@@ -66,20 +79,20 @@ def featureEntropy(sorted_feature, population):
         
     return feature_entropy   
 
-def minEntropyFeature(array):
+def minEntropyFeature(array, categories):
     
     columns = len(array[0])
 
     sorted_features = []
     feature_entropies = []
     
-    print(array)
+#     print(array)
     
     #takes the categories from each feature
     for feature_number in range(columns-1):
         
         #Returns a list of unique categories within the feature
-        feature_categories = featureCategories(array, feature_number)
+        feature_categories = categories[feature_number]
         
         sorted_feature = sortedFeature(array, feature_number, feature_categories)
         
@@ -96,32 +109,33 @@ def minEntropyFeature(array):
     
     return (min_entropy_feature, min_index) 
 
-def buildTree(array, depth):
+def buildTree(array, categories, depth):
     
-    print("depth: " + str(depth))
-    print(" ")
+#     print("depth: " + str(depth))
+#     print(" ")
     
+    #=====
     fractions = [classFraction(array, "yes"), classFraction(array, "no")]
     fraction = max(fractions)
     yes_no = ["yes", "no"]
 
     most_popular_class = yes_no[fractions.index(fraction)]
     class_and_fraction = most_popular_class + ": " + str(round(fraction, 3))
-    
+    #======
     if depth == 0 or fraction == 1.0:
         return class_and_fraction
     
     tree = []
     
-    sorted_feature, feature_index = minEntropyFeature(array)
+    sorted_feature, feature_index = minEntropyFeature(array, categories)
     
-    print("splitting by feature: " + str(feature_index))
-    print(" ")
+#     print("splitting by feature: " + str(feature_index))
+#     print(" ")
     
     tree.append(feature_index)
     
     for feature in sorted_feature:
-        tree.append(buildTree(feature, depth-1))
+        tree.append(buildTree(feature, categories, depth-1))
     
     return tree
     
@@ -131,9 +145,10 @@ headings = ['outlook', 'Temperature','Humidity', 'Wind', 'Play Tennis']
 
 array = extractData(url, headings)
 
-depth = 2
+depth = 1
 
-print(buildTree(array, depth))
+categories = featureCategories(array)
+print(buildTree(array, categories, depth))
 
 
         
