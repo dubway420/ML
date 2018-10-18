@@ -54,7 +54,7 @@ def classFraction(list_items, class_item):
         
     else: fraction = 1.0
         
-    return 
+    return fraction
         
 def featureEntropy(sorted_feature, population):
     
@@ -109,20 +109,30 @@ def minEntropyFeature(array, categories):
     
     return (min_entropy_feature, min_index) 
 
-def buildTree(array, categories, depth):
+def buildTree(array, categories, depth, headings, history):
     
 #     print("depth: " + str(depth))
 #     print(" ")
     
     #=====
     fractions = [classFraction(array, "yes"), classFraction(array, "no")]
+
     fraction = max(fractions)
+    
+#     print("fraction that has a single label: " + str(fraction))
+#     print(" ")
+    
+    
     yes_no = ["yes", "no"]
 
     most_popular_class = yes_no[fractions.index(fraction)]
-    class_and_fraction = most_popular_class + ": " + str(round(fraction, 3))
+    class_and_fraction = most_popular_class + ": " + str(round(fraction, 3)*100) + "%"
     #======
     if depth == 0 or fraction == 1.0:
+        print(class_and_fraction)
+        print(" ")
+        print("history: " + history)
+        print("=====")
         return class_and_fraction
     
     tree = []
@@ -134,21 +144,26 @@ def buildTree(array, categories, depth):
     
     tree.append(feature_index)
     
-    for feature in sorted_feature:
-        tree.append(buildTree(feature, categories, depth-1))
+#     print("splitting by feature: " + str(headings[feature_index]))
+#     print("=====")
+#     print(" ")
+    
+    for feature_no in range(len(sorted_feature)):
+        feature = sorted_feature[feature_no]
+        split_cat = categories[feature_index][feature_no]
+        tree.append(buildTree(feature, categories, depth-1, headings, history + " > " + split_cat))
     
     return tree
     
-
 url = "C:\Users\Huw\Documents\Tennis.csv"
 headings = ['outlook', 'Temperature','Humidity', 'Wind', 'Play Tennis']
 
 array = extractData(url, headings)
 
-depth = 1
+depth = 2
 
 categories = featureCategories(array)
-print(buildTree(array, categories, depth))
+print(buildTree(array, categories, depth, headings, ""))
 
 
         
