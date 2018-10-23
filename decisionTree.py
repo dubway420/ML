@@ -5,6 +5,11 @@ Created on 12 Oct 2018
 '''
 import pandas
 import math
+from __builtin__ import int
+from sklearn.externals.six import StringIO  
+from IPython.display import Image  
+from sklearn.tree import export_graphviz
+# import pydotplus
 
 def extractData(url, headings):
     dataset = pandas.read_csv(url, names=headings)
@@ -109,53 +114,49 @@ def minEntropyFeature(array, categories):
     
     return (min_entropy_feature, min_index) 
 
-def buildTree(array, categories, depth, headings, history):
+def classPopularFraction(yes_no, array):
     
-#     print("depth: " + str(depth))
-#     print(" ")
+    fractions = []
+    for class_item in yes_no:
+        fractions.append(classFraction(array, class_item))
     
-    #=====
-    fractions = [classFraction(array, "yes"), classFraction(array, "no")]
-
     fraction = max(fractions)
     
-#     print("fraction that has a single label: " + str(fraction))
-#     print(" ")
+    most_popular_class = yes_no[fractions.index(fraction)]
     
+    return (fraction, most_popular_class)
+        
+def buildTree(array, categories, depth, headings, history):
     
     yes_no = ["yes", "no"]
 
-    most_popular_class = yes_no[fractions.index(fraction)]
+    fraction, most_popular_class = classPopularFraction(yes_no, array)
     class_and_fraction = most_popular_class + ": " + str(round(fraction, 3)*100) + "%"
+    
     #======
     if depth == 0 or fraction == 1.0:
-        print(class_and_fraction)
-        print(" ")
-        print("history: " + history)
-        print("=====")
+#         print(class_and_fraction)
+#         print(" ")
+#         print("history: " + history)
+#         print("=====")
         return class_and_fraction
     
-    tree = []
+    tree, branch = [], []
     
     sorted_feature, feature_index = minEntropyFeature(array, categories)
     
-#     print("splitting by feature: " + str(feature_index))
-#     print(" ")
-    
     tree.append(feature_index)
-    
-#     print("splitting by feature: " + str(headings[feature_index]))
-#     print("=====")
-#     print(" ")
     
     for feature_no in range(len(sorted_feature)):
         feature = sorted_feature[feature_no]
         split_cat = categories[feature_index][feature_no]
-        tree.append(buildTree(feature, categories, depth-1, headings, history + " > " + split_cat))
+        branch.append(buildTree(feature, categories, depth-1, headings, history + " > " + split_cat))
     
+    tree.append(branch)
     return tree
     
-url = "C:\Users\Huw\Documents\Tennis.csv"
+# url = "C:\Users\Huw\Documents\Tennis.csv"
+url = "https://raw.githubusercontent.com/dubway420/ML/master/Tennis.csv"
 headings = ['outlook', 'Temperature','Humidity', 'Wind', 'Play Tennis']
 
 array = extractData(url, headings)
@@ -163,7 +164,36 @@ array = extractData(url, headings)
 depth = 2
 
 categories = featureCategories(array)
-print(buildTree(array, categories, depth, headings, ""))
+tree = buildTree(array, categories, depth, headings, "")
+
+# print(tree)
+
+x = array[0]
+
+i = 0
+feature = tree[i]
+
+if (type(feature) == int):
+    next_level = tree[i+1]
+
+
+while (type(feature) == int):
+    
+    feature_categories = categories[feature]
+    x_feature_value = x[feature]
+    
+    feature_category_index = feature_categories.index(x_feature_value)
+    
+    feature = next_level[0]
+    
+    if (type(feature) == int):
+        next_level = next_level[1]
+    
+print(feature)
+print("hello")
+
+# print(isinstance(tree[1], (list,)))
+ 
 
 
         
