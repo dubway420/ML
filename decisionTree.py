@@ -201,21 +201,18 @@ print(" ")
 
 for x in array:
 
-    print("=========")
-    print("Testing data point:")
-    print("correct answer: " + x[len(x)-1])
-    print(" ")
+    correct = x[len(x)-1]
     
     prediction, chance = testData(categories, tree, x)    
-    print(prediction)
+    if correct != prediction:
+        print("error")
+    else:
+        print("match")    
 
 # TODO:
 # Convert output to NL
 # Classes determining function
-# Test/output function
 
-
-# print(isinstance(tree[1], (list,)))
  
 
 
