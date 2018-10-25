@@ -126,12 +126,12 @@ def classPopularFraction(yes_no, array):
     
     return (fraction, most_popular_class)
         
-def buildTree(array, categories, depth, headings, history):
+def buildTree(array, categories, depth):
     
     yes_no = ["yes", "no"]
 
     fraction, most_popular_class = classPopularFraction(yes_no, array)
-    class_and_fraction = most_popular_class + ": " + str(round(fraction, 3)*100) + "%"
+    class_and_fraction = most_popular_class + "|" + str(fraction)
     
     #======
     if depth == 0 or fraction == 1.0:
@@ -150,12 +150,11 @@ def buildTree(array, categories, depth, headings, history):
     for feature_no in range(len(sorted_feature)):
         feature = sorted_feature[feature_no]
         split_cat = categories[feature_index][feature_no]
-        branch.append(buildTree(feature, categories, depth-1, headings, history + " > " + split_cat))
+        branch.append(buildTree(feature, categories, depth-1))
     
     tree.append(branch)
     return tree
     
-# url = "C:\Users\Huw\Documents\Tennis.csv"
 url = "https://raw.githubusercontent.com/dubway420/ML/master/Tennis.csv"
 headings = ['outlook', 'Temperature','Humidity', 'Wind', 'Play Tennis']
 
@@ -163,34 +162,55 @@ array = extractData(url, headings)
 
 depth = 2
 
-categories = featureCategories(array)
-tree = buildTree(array, categories, depth, headings, "")
+print("Producing category and tree arrays")
 
+categories = featureCategories(array)
+tree = buildTree(array, categories, depth)
+
+print("Array production complete")
+print(tree)
 # print(tree)
 
 x = array[0]
 
+print("Testing data point:")
+print(x)
+print("=========")
+print(" ")
+
+#=======================
 i = 0
 feature = tree[i]
+print("splitting by: " + headings[feature])
 
 if (type(feature) == int):
     next_level = tree[i+1]
-
+    print("first next level: " + str(next_level))
 
 while (type(feature) == int):
     
     feature_categories = categories[feature]
-    x_feature_value = x[feature]
+    print("categories are: " + str(feature_categories))
     
+    x_feature_value = x[feature]
+    print("test value has a category of: " + x_feature_value)
     feature_category_index = feature_categories.index(x_feature_value)
+    print("index of: " + str(feature_category_index))
     
     feature = next_level[0]
     
     if (type(feature) == int):
         next_level = next_level[1]
-    
-print(feature)
-print("hello")
+
+#=======================
+print(feature)    
+# print("The output is predicted to be: " + feature[0] + " with " + str(feature[1]*100) + "% certainty")
+
+# TODO:
+# Convert output to NL
+# Classes determining function
+# Test/output function
+
 
 # print(isinstance(tree[1], (list,)))
  
