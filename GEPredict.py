@@ -23,6 +23,13 @@ def classifiers():
 
 def bestClassifierSelect(number_splits, models, features_training, classes_training, seed, scoring):
 
+    names = []
+    commands = []
+    for i in range(0, len(models)): 
+        name, command = models[i]
+        commands.append(command)
+        names.append(name)
+    
     best_result = 0
     best_result_model = ""
       
@@ -42,6 +49,35 @@ def bestClassifierSelect(number_splits, models, features_training, classes_train
     model = commands[names.index(name)]      
     
     return (name, model)  
-                  
 
+def trainingValidationSets(url, headings, validation_fraction, seed):  
+    
+    dataset = pandas.read_csv(url, names=headings)
+    array = dataset.values
+    
+    len_m1 = len(array[0])-1
+     
+    # Split data into features and tags
+    features = array[:, 0:len_m1]
+    classes = array[:, len_m1]
+    
+    features_training, features_validation, classes_training, classes_validation = model_selection.train_test_split(features, classes, test_size=validation_fraction, random_state=seed)
 
+    return (features_training, features_validation, classes_training, classes_validation)
+                
+seed = 7
+scoring = 'accuracy'
+validation_fraction = 0.20
+
+# Load and arrange data into array
+url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/iris.csv"
+headings = ['sepal-length', 'sepal-width', 'petal-length', 'petal-width', 'class']
+
+#======#======
+models = classifiers()
+
+features_training, features_validation, classes_training, classes_validation = trainingValidationSets(url, headings, validation_fraction, seed)
+
+classifier_name, classifier_command = bestClassifierSelect(10, models, features_training, classes_training, seed, scoring)
+
+print(classifier_name)
