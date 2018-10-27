@@ -82,7 +82,6 @@ best_overall_model = commands[names.index(best_overall_model_name)]
 best_overall_model.fit(features_training, tags_training)
 predictions = best_overall_model.predict(features_validation)
 
-
 print(predictions)
 # print(accuracy_score(tags_validation, predictions))
 # print(confusion_matrix(tags_validation, predictions))
